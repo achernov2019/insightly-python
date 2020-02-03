@@ -629,7 +629,7 @@ class Insightly():
                 # fall back to plain text (sometimes the server ignores the gzip encoding request, e.g. staging environment)
                 pass
         if response == 'headers':
-            return result.info().headers
+            return result.info()
         else:
             return text
         
@@ -1061,13 +1061,14 @@ class Insightly():
         num_records = 0
         url = '/' + object_type + '?count_total=true'
         headers = self.generateRequest(url, 'GET', None, response='headers')
+        headers = headers.as_string().split("\n")
         for h in headers:
             pv = stringsplit(h, ':')
             if len(pv) > 1:
                 parm = pv[0]
                 value = pv[1]
                 if stringcount(parm, 'Total-Count') > 0:
-                    num_records = int(string.strip(value))
+                    num_records = int(value)
         if num_records > 0:
             skip = 0
             records_found = 0
@@ -1089,7 +1090,7 @@ class Insightly():
                         last_id = records[len(records) - 1][record_id]
                 self.printline('FOUND ' + str(records_found) + ' of ' + str(num_records) + ' expected ' + object_type)
             else:
-                return
+                return num_records
         
     def search(self, object_type, expression, top=100, skip=0, expect=0):
         """
